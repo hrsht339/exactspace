@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js"></script>
+    <title>JSON Form</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1000px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-top: 40px;
+        }
+
+        .json-input,
+        .json-display {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .json-input {
+            background-color: #ffe3e3;
+            border-right: 2px solid #ffb3b3;
+        }
+
+        .json-display {
+            background-color: #e3f7ff;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: none;
+        }
+
+        button {
+            display: block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        form label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        form input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        p {
+            margin: 0;
+            color: #d9534f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="json-input">
+            <h2>Enter JSON:</h2>
+            <textarea id="json-textarea" rows="10" cols="40"></textarea>
+            <button id="submit-button">Submit</button>
+        </div>
+        <div class="json-display">
+            <h2>JSON Representation:</h2>
+            <div id="json-form"></div>
+        </div>
+    </div>
+    <script>
+        const submitButton = document.getElementById("submit-button");
+    const jsonFormContainer = document.getElementById("json-form");
+
+    const codeEditor = CodeMirror.fromTextArea(document.getElementById('json-textarea'), {
+      mode: 'javascript',
+      theme: 'default',
+      lineNumbers: true,
+      indentUnit: 2,
+      autofocus: true,
+    });
+
+    submitButton.addEventListener("click", async () => {
+      const json = codeEditor.getValue(); 
+
+      try {
+        const response = await fetch("/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: json  
+
+        });
+
+        const isValidJSON = await response.json();
+        console.log(isValidJSON);
+
+        if (isValidJSON) {
+          const parsedJSON = JSON.parse(json);
+          const jsonKeys = Object.keys(parsedJSON);
+
+          let formHTML = `<form>`;
+          jsonKeys.forEach(key => {
+            formHTML += `
+            <label for="${key}">${key}:</label>
+            <input type="text" id="${key}" value="${parsedJSON[key]}"><br>`;
+          });
+          formHTML += `</form>`;
+
+          jsonFormContainer.innerHTML = formHTML;
+        } else {
+          jsonFormContainer.innerHTML = "<p>Invalid JSON input.</p>";
+        }
+      } catch (error) {
+        jsonFormContainer.innerHTML = "<p>Invalid JSON input.</p>";
+      }
+    });
+    </script>
+</body>
+
+</html>
