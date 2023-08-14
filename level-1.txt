@@ -1,0 +1,5 @@
+cd C:\Users\hrsht\OneDrive\Desktop\logs_experiment
+
+Get-ChildItem -Path *.log | Sort-Object -Property Length -Descending | Select-Object -First 1
+
+Get-Content log4.log | Select-Object -First 10 | Out-File truncated.log
