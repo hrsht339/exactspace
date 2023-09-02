@@ -9,6 +9,7 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "frontend.html"));
 });
 
+
 app.post("/",(req,res)=>{
   console.log(req.body)
     if (req.is('json') && Object.keys(req.body).length != 0) {
